@@ -19,7 +19,7 @@ services:
     build: ./backend
     restart: always
     ports: 
-      - "3000:3000"
+      - "8000:8000"
     environment:
       POSTGRES_HOST: database
       POSTGRES_USER: root
@@ -42,7 +42,7 @@ services:
     build: ./frontend
     restart: always
     ports: 
-      - "8000:8000"
+      - "3000:3000"
     depends_on: 
       - backend
 
