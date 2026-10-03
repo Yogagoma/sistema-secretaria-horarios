@@ -16,7 +16,7 @@ class Inscripcion(Base):
         index=True,
     )
     alumno_id: Mapped[int] = mapped_column(
-        ForeignKey("alumno.alumno_id"),
+        ForeignKey("alumnos.alumno_id"),
         nullable=False,
         index=True,
     )
