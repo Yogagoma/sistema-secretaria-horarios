@@ -16,7 +16,7 @@ class Nota(Base):
 
     nota_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     inscripcion_id: Mapped[int] = mapped_column(
-        ForeignKey("inscripciones.incripcion_id"),
+        ForeignKey("inscripciones.inscripcion_id"),
         nullable=False,
         index=True,
     )
