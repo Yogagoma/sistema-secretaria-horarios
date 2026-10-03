@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from fastapi_controllers import Controller, get, post, put, delete
 from sqlalchemy.future import select
 from backend.database import get_db_session 
-from backend.models.secretaria_model import Profesores
+from backend.models.profesor import Profesor
 from backend.models.base import Bloque, Aula 
 
 class SecretariaController(Controller):
@@ -70,5 +70,5 @@ class SecretariaController(Controller):
     @get("/docentes")
     async def obtener_docentes(self):
         async with get_db_session() as db:
-            result = await db.execute(select(Profesores))
+            result = await db.execute(select(Profesor))
             return result.scalars().all()
