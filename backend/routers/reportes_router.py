@@ -6,7 +6,7 @@ from backend.schemas.reportes_schema import(
     DetallePerLapso,
     DetalleFinAnio,
     CobroDeudas,
-    RecibosPendientes2,
+    RecibosPendientes2, 
     ReporteAcademico,
     ReporteFinanciaro
 )
