@@ -4,6 +4,7 @@ from sqlalchemy.future import select
 from backend.database import get_db_session 
 from backend.models.profesor import Profesor
 from backend.models.base import Bloque, Aula 
+from services.validador_horario import hay_choque_horario
 
 class SecretariaController(Controller):
     
@@ -26,6 +27,16 @@ class SecretariaController(Controller):
     @post("/horarios")
     async def crear_horario(self, horario_data: dict):
         async with get_db_session() as db:
+            # Validar si hay choque de horarios
+            await hay_choque_horario(
+                db=db,
+                dia=horario_data["dia"],
+                hora_inicio=horario_data["hora_inicio"],
+                hora_fin=horario_data["hora_fin"],
+                profesor_id=horario_data["profesor_id"],
+                aula_id=horario_data["aula_id"],
+                curso_id=horario_data["curso_id"]
+            )
             nuevo_horario = Bloque(**horario_data)
             db.add(nuevo_horario)
             await db.commit()
