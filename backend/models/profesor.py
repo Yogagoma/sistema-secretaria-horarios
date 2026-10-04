@@ -1,8 +1,8 @@
-from sqlalchemy import String, ForeignKey, Date, Numeric, CheckConstraint
+from sqlalchemy import String, ForeignKey, Numeric, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
-from datetime import date
-from typing import List
+
+
 
 class Profesor(Base):
     __tablename__ = "profesores"
