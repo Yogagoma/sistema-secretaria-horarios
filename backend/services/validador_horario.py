@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from fastapi import HTTPException
 from models.bloque import Bloque
-def hay_choque_horario(
+async def hay_choque_horario( # Función asíncrona para validar choques de horarios
     db: Session,
     dia: str,
     hora_inicio: time,
