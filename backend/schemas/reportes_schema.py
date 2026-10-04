@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Union
-
+ 
 
 # Desarrollando el envio de la informacion 
 # de los estudiantes luego de finalizar el lapso
