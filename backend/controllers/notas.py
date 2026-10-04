@@ -1,3 +1,4 @@
+from sqlalchemy.orm import query
 from sqlalchemy.orm import Session
 from backend.models.notas import Nota
 from backend.schemas.notas import NotaCreate, NotaUpdate
@@ -15,8 +16,11 @@ def obtener_nota(db: Session, nota_id: int) -> Nota | None:
     return db.get(Nota, nota_id)
 
 
-def listar_notas(db: Session) -> list[Nota]:
-    return db.query(Nota).all()
+def listar_notas(db: Session, inscripcion_id: int | None = None) -> list[Nota]:
+    consulta = db.query(Nota)
+    if inscripcion_id is not None:
+        consulta = consulta.filter(Nota.inscripcion_id == inscripcion_id)
+    return consulta.all()
 
 
 def actualizar_nota(
