@@ -1,55 +1,84 @@
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from backend.controllers.utils import confirmar
+from backend.exceptions import Conflicto, NoEncontrado
 from backend.models.materia import Materia
 from backend.schemas.materia import MateriaCreate, MateriaUpdate
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
+
+# Cambio: Se aceptaron todos los cambios del grupo 2, excepto el de eliminar_materia()
+async def _codigo_en_uso(
+    db: AsyncSession, codigo: str, excluir_id: int | None = None
+) -> bool:
+    consulta = select(Materia.materia_id).where(Materia.codigo == codigo)
+    if excluir_id is not None:
+        consulta = consulta.where(Materia.materia_id != excluir_id)
+    return await db.scalar(consulta.limit(1)) is not None
 
 
-def registrar_materia(db: Session, datos:MateriaCreate):
-    materia_existente = (
-        db.query(Materia).filter(Materia.codigo == datos.codigo).first()
+async def _nombre_grado_en_uso(
+    db: AsyncSession, nombre: str, grado: int, excluir_id: int | None = None
+) -> bool:
+    consulta = select(Materia.materia_id).where(
+        Materia.nombre == nombre,
+        Materia.grado == grado,
     )
-
-    if materia_existente:
-        return None
-    try:
-        materia = Materia(**datos.model_dump())
-        db.add(materia)
-        db.commit()
-        db.refresh(materia)
-        return materia
-    except IntegrityError:
-        db.rollback
-        return None
+    if excluir_id is not None:
+        consulta = consulta.where(Materia.materia_id != excluir_id)
+    return await db.scalar(consulta.limit(1)) is not None
 
 
-def obtener_materia(db: Session, materia_id: int):
-    return db.get(Materia, materia_id)
+async def registrar_materia(db: AsyncSession, datos: MateriaCreate) -> Materia:
+    if await _codigo_en_uso(db, datos.codigo):
+        raise Conflicto(f"Código [{datos.codigo}] ya registrado")
+    if await _nombre_grado_en_uso(db, datos.nombre, datos.grado):
+        raise Conflicto("Ya existe una materia con ese nombre para ese grado")
 
-
-def listar_materias(db: Session):
-    return db.query(Materia).all()
-
-
-def actualizar_materia(db: Session, materia_id: int, datos: MateriaUpdate):
-    materia = obtener_materia(db, materia_id)
-    if materia is None:
-        return None
-
-    datos_dict = datos.model_dump(exclude_unset=True)
-
-    for campo, valor in datos_dict.items():
-        setattr(materia, campo, valor)
-
-    db.commit()
-    db.refresh(materia)
+    materia = Materia(**datos.model_dump())
+    db.add(materia)
+    await confirmar(db, f"Código [{datos.codigo}] ya registrado")
+    await db.refresh(materia)
     return materia
 
 
-def eliminar_materia(db: Session, materia_id: int):
+async def obtener_materia(db: AsyncSession, id_materia: int) -> Materia:
+    materia = await db.get(Materia, id_materia)
+    if materia is None:
+        raise NoEncontrado("Materia no encontrada")
+    return materia
+
+
+async def listar_materias(db: AsyncSession) -> list[Materia]:
+    resultado = await db.scalars(select(Materia).order_by(Materia.materia_id))
+    return list(resultado.all())
+
+
+async def actualizar_materia(
+    db: AsyncSession, id_materia: int, datos: MateriaUpdate
+) -> Materia:
+    materia = await obtener_materia(db, id_materia)
+    cambios = datos.model_dump(exclude_unset=True, exclude_none=True)
+
+    nuevo_codigo = cambios.get("codigo")
+    if nuevo_codigo is not None and await _codigo_en_uso(db, nuevo_codigo, id_materia):
+        raise Conflicto(f"Código [{nuevo_codigo}] ya registrado")
+    nombre = cambios.get("nombre", materia.nombre)
+    grado = cambios.get("grado", materia.grado)
+    if await _nombre_grado_en_uso(db, nombre, grado, id_materia):
+        raise Conflicto("Ya existe una materia con ese nombre para ese grado")
+
+    for campo, valor in cambios.items():
+        setattr(materia, campo, valor)
+
+    await confirmar(db, "No se pudo actualizar la materia")
+    await db.refresh(materia)
+    return materia
+
+ # Cambio: Se descartó la funcionalidad de no eliminar materia, si el hay estudiantes inscritos, pero ahora eliminar_materia() no retorna nada  
+def eliminar_materia(db: Session, materia_id: int) -> None:
     materia = obtener_materia(db, materia_id)
     if materia is None:
         return None
 
     db.delete(materia)
     db.commit()
-    return materia

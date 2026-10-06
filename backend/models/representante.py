@@ -1,17 +1,14 @@
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 from .base import Base
-from typing import List
-from alumno import Alumno
 
+# Equivalente a tabla 'representantes'
 class Representante(Base):
     __tablename__ = "representantes"
 
-    representante_id: Mapped[int] = mapped_column(primary_key=True)
-    nombre: Mapped[str] = mapped_column(String(100))
-    cedula: Mapped[str] = mapped_column(String(10), unique=True)
-    correo: Mapped[str] = mapped_column(String(100), unique=True)
-    telefono: Mapped[str] = mapped_column(String(20))
-    direccion: Mapped[str] = mapped_column(String(200))
-    
-    alumnos: Mapped[List["Alumno"]] = relationship(back_populates="representante", cascade="all, delete-orphan")
+    representante_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    nombre: Mapped[str] = mapped_column(String(100), nullable=False)
+    cedula: Mapped[str] = mapped_column(String(10), nullable=False, unique=True)
+    correo: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
+    telefono: Mapped[str] = mapped_column(String(20), nullable=False)
+    direccion: Mapped[str] = mapped_column(String(200), nullable=False)

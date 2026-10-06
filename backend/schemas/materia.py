@@ -1,22 +1,27 @@
 from pydantic import BaseModel, ConfigDict, Field
 
-
+# Creación de materias
 class MateriaCreate(BaseModel):
-    nombre: str = Field(max_length=100)
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    nombre: str = Field(min_length=1, max_length=50)
+    codigo: str = Field(min_length=1, max_length=10)
     grado: int = Field(ge=1, le=5)
-    codigo: str = Field(max_length=10)
 
-
+# Actualización de materias
 class MateriaUpdate(BaseModel):
-    nombre: str | None = Field(default=None, max_length=100)
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    nombre: str | None = Field(default=None, min_length=1, max_length=50)
+    codigo: str | None = Field(default=None, min_length=1, max_length=10)
     grado: int | None = Field(default=None, ge=1, le=5)
-    codigo: str | None = Field(default=None, max_length=10)
 
-
+# Lectura de materias
 class MateriaRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     materia_id: int
     nombre: str
-    grado: int
     codigo: str
+    grado: int
 
-    model_config = ConfigDict(from_attributes=True)
