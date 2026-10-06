@@ -6,7 +6,7 @@ from backend.exceptions import Conflicto, NoEncontrado
 from backend.models.materia import Materia
 from backend.schemas.materia import MateriaCreate, MateriaUpdate
 
-
+# Cambio: Se aceptaron todos los cambios del grupo 2, excepto el de eliminar_materia()
 async def _codigo_en_uso(
     db: AsyncSession, codigo: str, excluir_id: int | None = None
 ) -> bool:
@@ -74,10 +74,11 @@ async def actualizar_materia(
     await db.refresh(materia)
     return materia
 
+ # Cambio: Se descartó la funcionalidad de no eliminar materia, si el hay estudiantes inscritos, pero ahora eliminar_materia() no retorna nada  
+def eliminar_materia(db: Session, materia_id: int) -> None:
+    materia = obtener_materia(db, materia_id)
+    if materia is None:
+        return None
 
-async def eliminar_materia(db: AsyncSession, id_materia: int) -> None:
-    materia = await obtener_materia(db, id_materia)
-    await db.delete(materia)
-    await confirmar(
-        db, "No se puede eliminar la materia porque tiene inscripciones asociadas"
-    )
+    db.delete(materia)
+    db.commit()

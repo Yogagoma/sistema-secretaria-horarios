@@ -1,6 +1,3 @@
-from datetime import datetime
-from decimal import Decimal
-
 from sqlalchemy import (
     CheckConstraint,
     DateTime,
@@ -11,16 +8,21 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column
+from decimal import Decimal
+from datetime import datetime
 
 from .base import Base
 
-
+# Equivalente a tabla 'notas'
 class Nota(Base):
     __tablename__ = "notas"
     __table_args__ = (
-        CheckConstraint("calificacion BETWEEN 0 AND 20", name="notas_calificacion_check"),
-        CheckConstraint("lapso BETWEEN 1 AND 3", name="notas_lapso_check"),
-        UniqueConstraint("inscripcion_id", "lapso", name="nota_unica"),
+    CheckConstraint(
+        "calificacion >= 0 AND calificacion <= 20", # Nota entre 0 y 20
+        name="ck_notas_calificacion",
+    ),
+        CheckConstraint("lapso BETWEEN 1 AND 3", name="notas_lapso_check"), # Lapso entre 1 y 3
+        UniqueConstraint("inscripcion_id", "lapso", name="nota_unica"), # Nota única por lapso
     )
 
     nota_id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -32,3 +34,7 @@ class Nota(Base):
     fecha_registro: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now()
     )
+
+  
+
+
