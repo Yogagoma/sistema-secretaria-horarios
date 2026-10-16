@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.controllers.inscripcion import (
+from controllers.inscripcion import (
     actualizar_inscripcion,
     eliminar_inscripcion,
     listar_inscripciones,
     obtener_inscripcion,
     registrar_inscripcion,
 )
-from backend.database import get_db
-from backend.schemas.inscripcion import (
+from database import get_db
+from schemas.inscripcion import (
     InscripcionCreate,
     InscripcionRead,
     InscripcionUpdate,
